@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="gradesBox">已用步数：<span class="grades"></span></div>
+    <ul id="jigsawBox" class="clearfix"></ul>
+</body>
+<script>
+    window.onload = function (){
+        var level = 9;//难度等级
+        var rows = 3;//列数
+        var grades = 0;//分数
+        var arr=[];
+        var oLi = '';
+        var oUl = document.getElementById('jigsawBox');
+        var oGrades = document.getElementsByClassName('grades')[0];
+        //init
+        for(var i = 0,length = level - 1;i<length;i++){
+            arr[i]=i;
+        }
+        arr.sort(sortNumber);
+        for(var i=0;i<level;i++){
+            if((i+1) == level){
+                oLi += '<li class="empty" data-index="'+i+'" data-id="'+(level-1)+'">'+(level-1)+'</li>';
+            }else{
+                oLi += '<li class="jigsaw img-'+arr[i]+'" data-index="'+i+'" data-id="'+arr[i]+'">'+arr[i]+'</li>';
+            }
+        }
+
+
+        oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
+
+
+        function move(action,selector,callback){
+            document.addEventListener(action,function (e){
+                if(selector == e.target.tagName.toLowerCase() || selector == e.target.className){
+                    callback(e);
+                }
+            })
+
+        }
+
+        move('click','li',function (e){
+            var emptyLi = document.getElementsByClassName('empty')[0];
+            var emptyLiIndex = emptyLi.attributes['data-index'].nodeValue - 0;
+            var index = e.target.attributes['data-index'].nodeValue - 0;
+            var className = e.target.className;
+            var emptyId = emptyLi.attributes['data-id'].nodeValue;
+            var currentId = e.target.attributes['data-id'].nodeValue;
+            var oLi = document.getElementsByTagName('li');
+
+            var leftLi = emptyLiIndex - 1;
+            var rightLi = emptyLiIndex + 1;
+            var topLi = emptyLiIndex - rows;
+            var bottomLi = emptyLiIndex + rows;
+
+
+            if(index == leftLi || index == rightLi || index == topLi || index == bottomLi){
+                grades += 1;//步数加1
+                emptyLi.className = className;
+                e.target.className = 'empty';
+                e.target.setAttribute('data-id',emptyId);
+                emptyLi.setAttribute('data-id',currentId);
+                oGrades.innerHTML = grades;
+                e.target.innerHTML = emptyId;
+                emptyLi.innerHTML = currentId;
+
+
+                isSuccess(oLi);
+            }
+        });
+
+        function isSuccess(obj){
+            var flag = true;
+            for(var i=0;i<level;i++){
+                var id = obj[i].attributes['data-id'].nodeValue;
+                if(id != i){
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag){
+                alert('分数:'+grades);
+            }
+        }
+
+        function sortNumber(){
+            return 0.5-Math.random();
+        }
+
+    }
+</script>
+</html>
