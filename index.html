@@ -18,22 +18,46 @@
         var rows = 3;//列数
         var grades = 0;//分数
         var arr=[];
+        var totalArr=[];
         var oLi = '';
         var oUl = document.getElementById('jigsawBox');
         var oGrades = document.getElementsByClassName('grades')[0];
+        var value = level - 2;
+        var n = 0;//计算逆序数
         //init
         for(var i = 0,length = level - 1;i<length;i++){
             arr[i]=i;
+            totalArr[i]=0;
         }
         arr.sort(sortNumber);
-        for(var i=0;i<level;i++){
+        for(let i=0,length=arr.length;i<length;i++){
+            var index = arr[i];
+            var jLength = i+1;
+            totalArr[index] = value;
+            value --;
+            for(let j=1;j<jLength;j++){
+                if(arr[i]>arr[i-j]){
+                    n += 1;
+                }
+            }
+        }
+        console.log(n);
+        console.log(totalArr);
+        if(n%2 != 0){
+            //逆序数为偶数
+            var first = totalArr[0];
+            var second = totalArr[1];
+            totalArr[0] = second;
+            totalArr[1] = first;
+        }
+        console.log(totalArr);
+        for(var i=0,length = level;i<length;i++){
             if((i+1) == level){
                 oLi += '<li class="empty" data-index="'+i+'" data-id="'+(level-1)+'">'+(level-1)+'</li>';
             }else{
-                oLi += '<li class="jigsaw img-'+arr[i]+'" data-index="'+i+'" data-id="'+arr[i]+'">'+arr[i]+'</li>';
+                oLi += '<li class="jigsaw img-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'">'+totalArr[i]+'</li>';
             }
         }
-
 
         oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
 
@@ -73,12 +97,13 @@
                 emptyLi.innerHTML = currentId;
 
 
-                isSuccess(oLi);
+                isSuccess(oLi,emptyLi);
             }
         });
 
-        function isSuccess(obj){
+        function isSuccess(obj,emptyObj){
             var flag = true;
+            var oDivOuterBox = document.getElementById('jigsawBox');
             for(var i=0;i<level;i++){
                 var id = obj[i].attributes['data-id'].nodeValue;
                 if(id != i){
@@ -88,6 +113,8 @@
             }
             if(flag){
                 alert('分数:'+grades);
+                oDivOuterBox.className = 'success';
+                document.getElementsByClassName('empty')[0].className = '';
             }
         }
 
