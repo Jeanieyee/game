@@ -6,15 +6,43 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <link rel="stylesheet" href="index.css">
+    <script>
+        (function(doc, win) {
+            var docEl = doc.documentElement,
+                    isIOS = navigator.userAgent.match(/iphone|ipod|ipad/gi),
+                    dpr = isIOS ? Math.min(win.devicePixelRatio, 3) : 1,
+                    //dpr = window.top === window.self ? dpr : 1, //被iframe引用时，禁止缩放
+                    scale = 1 / dpr,
+                    resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize';
+            docEl.dataset.dpr = dpr;
+            var recalc = function() {
+                var width = docEl.clientWidth;
+                if (width / dpr > 640) {
+                    width = 640 * dpr;
+                }
+                window.remScale =  width / 640;//缩放比例，用于JS设置大小时进行等比缩放
+                docEl.style.fontSize = 200 * (width / 640) + 'px';
+            };
+            recalc();
+            if (!doc.addEventListener) return;
+            win.addEventListener(resizeEvt, recalc, false);
+        })(document, window);
+    </script>
+    <link rel="stylesheet" href="public/index.min.css">
 </head>
 <body>
+    <div class="levleBox">
+        <a class="level" href="javascript:;" data-level="0">简单3x3</a>
+        <a class="level" href="javascript:;" data-level="1">一般4x3</a>
+        <a class="level" href="javascript:;" data-level="2">困难4x4</a>
+    </div>
     <div class="gradesBox">已用步数：<span class="grades"></span></div>
-    <ul id="jigsawBox" class="clearfix"></ul>
+    <ul id="jigsawBox" class="easy"></ul>
 </body>
 <script>
     window.onload = function (){
-        var level = 9;//难度等级
+        var levelArr = [9,12,16];
+        var level = 9;//难度等级9,12，16,默认为9
         var rows = 3;//列数
         var grades = 0;//分数
         var arr=[];
@@ -22,47 +50,67 @@
         var oLi = '';
         var oUl = document.getElementById('jigsawBox');
         var oGrades = document.getElementsByClassName('grades')[0];
-        var value = level - 2;
-        var n = 0;//计算逆序数
-        //init
-        for(var i = 0,length = level - 1;i<length;i++){
-            arr[i]=i;
-            totalArr[i]=0;
-        }
-        arr.sort(sortNumber);
-        for(let i=0,length=arr.length;i<length;i++){
-            var index = arr[i];
-            var jLength = i+1;
-            totalArr[index] = value;
-            value --;
-            for(let j=1;j<jLength;j++){
-                if(arr[i]>arr[i-j]){
-                    n += 1;
+        var value = 7;
+        var n = 0;//逆序数
+
+        eventListener('click','level',function (e){
+            level = levelArr[e.target.attributes['data-level'].nodeValue];
+            document.getElementsByClassName('levleBox')[0].style.display = 'none';
+            value = level-2;
+            if(level != 9){
+                oUl.className = 'trouble';
+                rows = 4;
+            }
+            init();
+        });
+
+        //获取难度值
+        /*eventListener('click','level',function (e){
+            level = levelArr[e.target.attributes['data-level'].nodeValue];
+        });*/
+
+        //init 打乱拼图顺序
+        function init(){
+            for(var i = 0,length = level - 1;i<length;i++){
+                arr[i]=i;
+                totalArr[i]=0;
+            }
+            arr.sort(sortNumber);
+            for(let i=0,length=arr.length;i<length;i++){
+                var index = arr[i];
+                var jLength = i+1;
+                totalArr[index] = value;
+                value --;
+                for(let j=1;j<jLength;j++){
+                    if(arr[i]>arr[i-j]){
+                        n += 1;
+                    }
                 }
             }
-        }
-        console.log(n);
-        console.log(totalArr);
-        if(n%2 != 0){
-            //逆序数为偶数
-            var first = totalArr[0];
-            var second = totalArr[1];
-            totalArr[0] = second;
-            totalArr[1] = first;
-        }
-        console.log(totalArr);
-        for(var i=0,length = level;i<length;i++){
-            if((i+1) == level){
-                oLi += '<li class="empty" data-index="'+i+'" data-id="'+(level-1)+'">'+(level-1)+'</li>';
-            }else{
-                oLi += '<li class="jigsaw img-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'">'+totalArr[i]+'</li>';
+            console.log(n);
+            console.log(totalArr);
+            if(n%2 != 0){
+                //逆序数为偶数，拼图有解
+                var first = totalArr[0];
+                var second = totalArr[1];
+                totalArr[0] = second;
+                totalArr[1] = first;
             }
+            console.log(totalArr);
+            /*渲染页面*/
+            for(var i=0,length = level;i<length;i++){
+                if((i+1) == level){
+                    oLi += '<li class="empty" data-index="'+i+'" data-id="'+(level-1)+'"></li>';
+                }else{
+                    oLi += '<li class="jigsaw img-'+level+'-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'"></li>';
+                }
+            }
+            oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
         }
 
-        oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
 
 
-        function move(action,selector,callback){
+        function eventListener(action,selector,callback){
             document.addEventListener(action,function (e){
                 if(selector == e.target.tagName.toLowerCase() || selector == e.target.className){
                     callback(e);
@@ -71,7 +119,9 @@
 
         }
 
-        move('click','li',function (e){
+
+        //移动拼图
+        eventListener('click','li',function (e){
             var emptyLi = document.getElementsByClassName('empty')[0];
             var emptyLiIndex = emptyLi.attributes['data-index'].nodeValue - 0;
             var index = e.target.attributes['data-index'].nodeValue - 0;
@@ -112,9 +162,9 @@
                 }
             }
             if(flag){
-                alert('分数:'+grades);
-                oDivOuterBox.className = 'success';
+                oDivOuterBox.className = 'success-'+level;
                 document.getElementsByClassName('empty')[0].className = '';
+                alert('分数:'+grades);
             }
         }
 
