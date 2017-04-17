@@ -17,37 +17,78 @@ li{list-style: none}
     }
 }
 $rem:200*640/750rem;
+.gradesBox{
+    text-align: center;
+    line-height: 40/$rem;
+    font-size:40/$rem;
+}
 #jigsawBox{
+    position: relative;
+    margin:0 auto;
     width:480/$rem;
+    height:auto;
     &:after{
         @extend .clearfix;
     }
-    li{
+    p{
         float: left;
         font-size:40/$rem;
         color: #f00;
     }
+    img{
+        width:100%;
+        height:100%;
+    }
+    span{
+        position: absolute;
+        left:50%;
+        top:50%;
+        -webkit-transform: translate(-50%,-50%);
+        transform: translate(-50%,-50%);
+        text-align: center;
+        color: #fce206;
+        font-size:100/$rem;
+    }
+}
+.disabled{
+    border:1px solid #fff !important;
+    background: #ccc !important;
+    color: #fff !important;
 }
 .easy{
-    li{
+    p{
         width:160/$rem;
         height:160/$rem;
     }
 }
 .trouble{
-    li{
+    p{
         width:120/$rem;
         height:120/$rem;
     }
 }
-#jigsawBox li.empty{
+#jigsawBox p.empty{
     background: #fff !important;
 }
-.levleBox{
+.jigsawInit{
+    width:480/$rem !important;
+    height:480/$rem !important;
+    background: url("img/init.jpg");
+    background-size: 100% 100%;
+}
+.levelBox{
     position: fixed;
     width:100%;
     height: 100%;
-    background: rgba(0,0,0,.8);
+    background: rgba(0,0,0,.5);
+    z-index:100;
+    .levelInnerBox{
+        position: absolute;
+        left:50%;
+        top:50%;
+        transform: translate(-50%,-50%);
+        -webkit-transform: translate(-50%,-50%);
+    }
     a{
         margin:0 auto 20/$rem auto;
         display: block;
@@ -61,6 +102,25 @@ $rem:200*640/750rem;
         text-align: center;
         color: #000;
     }
+}
+.reStart,.reChoose{
+    margin:20/$rem auto 0 auto;
+    display: block;
+    border-radius: 8/$rem;
+    border:1px solid #000;
+    width:200/$rem;
+    height: 50/$rem;
+    background: #fce206;
+    font-size:16/$rem;
+    line-height: 50/$rem;
+    text-align: center;
+    color: #000;
+}
+.blur {
+    -webkit-filter: blur(10px); /* Chrome, Opera */
+    -moz-filter: blur(10px);
+    -ms-filter: blur(10px);
+    filter: blur(10px);
 }
 .gradesBox{
     font-size:16/$rem;

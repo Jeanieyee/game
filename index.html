@@ -31,13 +31,19 @@
     <link rel="stylesheet" href="public/index.min.css">
 </head>
 <body>
-    <div class="levleBox">
-        <a class="level" href="javascript:;" data-level="0">简单3x3</a>
-        <a class="level" href="javascript:;" data-level="1">一般4x3</a>
-        <a class="level" href="javascript:;" data-level="2">困难4x4</a>
+    <div class="levelBox">
+        <div class="levelInnerBox">
+            <a class="level" href="javascript:;" data-level="0">简单3x3</a>
+            <a class="level" href="javascript:;" data-level="1">一般4x3</a>
+            <a class="level" href="javascript:;" data-level="2">困难4x4</a>
+        </div>
     </div>
-    <div class="gradesBox">已用步数：<span class="grades"></span></div>
-    <ul id="jigsawBox" class="easy"></ul>
+    <div id="containerBox" class="blur">
+        <div class="gradesBox">已用步数：<span class="grades">0</span></div>
+        <div id="jigsawBox" class="jigsawInit"></div>
+        <a href="javascript:;" class="reStart disabled">重新开始</a>
+        <a href="javascript:;" class="reChoose disabled">选择难度</a>
+    </div>
 </body>
 <script>
     window.onload = function (){
@@ -50,78 +56,41 @@
         var oLi = '';
         var oUl = document.getElementById('jigsawBox');
         var oGrades = document.getElementsByClassName('grades')[0];
+        var reStartBtn = document.getElementsByClassName('reStart')[0];
+        var reChooseBtn = document.getElementsByClassName('reChoose')[0];
         var value = 7;
         var n = 0;//逆序数
-
+        //选择难度
         eventListener('click','level',function (e){
             level = levelArr[e.target.attributes['data-level'].nodeValue];
-            document.getElementsByClassName('levleBox')[0].style.display = 'none';
-            value = level-2;
             if(level != 9){
                 oUl.className = 'trouble';
                 rows = 4;
+            }else{
+                oUl.className = 'easy';
+                rows = 3;
             }
-            init();
+            var imgStr = '<img src="public/img/success-'+level+'.jpg"><span class="cutDown">5</span>';
+            oUl.innerHTML = imgStr;
+            isShowModule(false);
+            var cutDownNumber = 4;
+            var oCutDown = document.getElementsByClassName('cutDown')[0];
+            var timer = setInterval(function (){
+                reStartBtn.className = 'reStart disabled';
+                reChooseBtn.className = 'reChoose disabled';
+                oCutDown.innerHTML = cutDownNumber;
+                if(cutDownNumber == 0){
+                    reStartBtn.className = 'reStart';
+                    reChooseBtn.className = 'reChoose';
+                    init();
+                    clearInterval(timer);
+                }
+                cutDownNumber --;
+            },1000)
+
         });
-
-        //获取难度值
-        /*eventListener('click','level',function (e){
-            level = levelArr[e.target.attributes['data-level'].nodeValue];
-        });*/
-
-        //init 打乱拼图顺序
-        function init(){
-            for(var i = 0,length = level - 1;i<length;i++){
-                arr[i]=i;
-                totalArr[i]=0;
-            }
-            arr.sort(sortNumber);
-            for(let i=0,length=arr.length;i<length;i++){
-                var index = arr[i];
-                var jLength = i+1;
-                totalArr[index] = value;
-                value --;
-                for(let j=1;j<jLength;j++){
-                    if(arr[i]>arr[i-j]){
-                        n += 1;
-                    }
-                }
-            }
-            console.log(n);
-            console.log(totalArr);
-            if(n%2 != 0){
-                //逆序数为偶数，拼图有解
-                var first = totalArr[0];
-                var second = totalArr[1];
-                totalArr[0] = second;
-                totalArr[1] = first;
-            }
-            console.log(totalArr);
-            /*渲染页面*/
-            for(var i=0,length = level;i<length;i++){
-                if((i+1) == level){
-                    oLi += '<li class="empty" data-index="'+i+'" data-id="'+(level-1)+'"></li>';
-                }else{
-                    oLi += '<li class="jigsaw img-'+level+'-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'"></li>';
-                }
-            }
-            oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
-        }
-
-
-
-        function eventListener(action,selector,callback){
-            document.addEventListener(action,function (e){
-                if(selector == e.target.tagName.toLowerCase() || selector == e.target.className){
-                    callback(e);
-                }
-            })
-
-        }
-
-
         //移动拼图
-        eventListener('click','li',function (e){
+        eventListener('click','jigsaw',function (e){
             var emptyLi = document.getElementsByClassName('empty')[0];
             var emptyLiIndex = emptyLi.attributes['data-index'].nodeValue - 0;
             var index = e.target.attributes['data-index'].nodeValue - 0;
@@ -150,7 +119,62 @@
                 isSuccess(oLi,emptyLi);
             }
         });
+        //重新开始
+        eventListener('click','reStart',function (e){
+            if(e.target.className == 'reStart'){
+                init();
+            }
 
+        });
+        //重新选择难度
+        eventListener('click','reChoose',function (e){
+            if(e.target.className == 'reChoose'){
+                reStartBtn.className = 'reStart disabled';
+                reChooseBtn.className = 'reChoose disabled';
+                isShowModule(true);
+            }
+        });
+
+        //init 打乱拼图顺序
+        function init(){
+            value = level-2;
+            oLi = '';
+            arr = [];
+            totalArr = [];
+
+            for(var i = 0,length = level - 1;i<length;i++){
+                arr[i]=i;
+                totalArr[i]=0;
+            }
+            arr.sort(sortNumber);
+            for(let i=0,length=arr.length;i<length;i++){
+                var index = arr[i];
+                var jLength = i+1;
+                totalArr[index] = value;
+                value --;
+                for(let j=1;j<jLength;j++){
+                    if(arr[i]>arr[i-j]){
+                        n += 1;
+                    }
+                }
+            }
+            if(n%2 != 0){
+                //逆序数为偶数，拼图有解
+                var first = totalArr[0];
+                var second = totalArr[1];
+                totalArr[0] = second;
+                totalArr[1] = first;
+            }
+            /*渲染页面*/
+            for(var i=0,length = level;i<length;i++){
+                if((i+1) == level){
+                    oLi += '<p class="empty" data-index="'+i+'" data-id="'+(level-1)+'"></p>';
+                }else{
+                    oLi += '<p class="jigsaw img-'+level+'-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'"></p>';
+                }
+            }
+            oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
+        }
         function isSuccess(obj,emptyObj){
             var flag = true;
             var oDivOuterBox = document.getElementById('jigsawBox');
@@ -167,9 +191,26 @@
                 alert('分数:'+grades);
             }
         }
-
         function sortNumber(){
             return 0.5-Math.random();
+        }
+        function eventListener(action,selector,callback){
+            document.addEventListener(action,function (e){
+                if(selector == e.target.tagName.toLowerCase() || selector == e.target.className){
+                    callback(e);
+                }
+            })
+
+        }
+        function isShowModule(flag){
+            if(flag){
+                document.getElementsByClassName('levelBox')[0].style.display = 'block';
+                document.getElementById('containerBox').className = 'blur';
+            }else{
+                document.getElementsByClassName('levelBox')[0].style.display = 'none';
+                document.getElementById('containerBox').className = '';
+            }
+
         }
 
     }
