@@ -30,7 +30,7 @@ $rem:200*640/750rem;
     &:after{
         @extend .clearfix;
     }
-    p{
+    li{
         float: left;
         font-size:40/$rem;
         color: #f00;
@@ -56,18 +56,18 @@ $rem:200*640/750rem;
     color: #fff !important;
 }
 .easy{
-    p{
+    li{
         width:160/$rem;
         height:160/$rem;
     }
 }
 .trouble{
-    p{
+    li{
         width:120/$rem;
         height:120/$rem;
     }
 }
-#jigsawBox p.empty{
+#jigsawBox li.empty{
     background: #fff !important;
 }
 .jigsawInit{

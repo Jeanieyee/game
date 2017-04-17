@@ -40,7 +40,7 @@
     </div>
     <div id="containerBox" class="blur">
         <div class="gradesBox">已用步数：<span class="grades">0</span></div>
-        <div id="jigsawBox" class="jigsawInit"></div>
+        <ul id="jigsawBox" class="jigsawInit"></ul>
         <a href="javascript:;" class="reStart disabled">重新开始</a>
         <a href="javascript:;" class="reChoose disabled">选择难度</a>
     </div>
@@ -90,7 +90,7 @@
 
         });
         //移动拼图
-        eventListener('click','jigsaw',function (e){
+        eventListener('click','li',function (e){
             var emptyLi = document.getElementsByClassName('empty')[0];
             var emptyLiIndex = emptyLi.attributes['data-index'].nodeValue - 0;
             var index = e.target.attributes['data-index'].nodeValue - 0;
@@ -114,14 +114,14 @@
                 oGrades.innerHTML = grades;
                 /*e.target.innerHTML = emptyId;
                 emptyLi.innerHTML = currentId;*/
-
-
                 isSuccess(oLi,emptyLi);
             }
         });
         //重新开始
         eventListener('click','reStart',function (e){
             if(e.target.className == 'reStart'){
+                grades = 0;
+                oGrades.innerHTML = grades;
                 init();
             }
 
@@ -129,6 +129,8 @@
         //重新选择难度
         eventListener('click','reChoose',function (e){
             if(e.target.className == 'reChoose'){
+                grades = 0;
+                oGrades.innerHTML = grades;
                 reStartBtn.className = 'reStart disabled';
                 reChooseBtn.className = 'reChoose disabled';
                 isShowModule(true);
@@ -141,7 +143,6 @@
             oLi = '';
             arr = [];
             totalArr = [];
-
             for(var i = 0,length = level - 1;i<length;i++){
                 arr[i]=i;
                 totalArr[i]=0;
@@ -158,6 +159,8 @@
                     }
                 }
             }
+            console.log(n)
+            console.log(totalArr)
             if(n%2 != 0){
                 //逆序数为偶数，拼图有解
                 var first = totalArr[0];
@@ -165,12 +168,13 @@
                 totalArr[0] = second;
                 totalArr[1] = first;
             }
+            console.log(totalArr)
             /*渲染页面*/
             for(var i=0,length = level;i<length;i++){
                 if((i+1) == level){
-                    oLi += '<p class="empty" data-index="'+i+'" data-id="'+(level-1)+'"></p>';
+                    oLi += '<li class="empty" data-index="'+i+'" data-id="'+(level-1)+'"></li>';
                 }else{
-                    oLi += '<p class="jigsaw img-'+level+'-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'"></p>';
+                    oLi += '<li class="jigsaw img-'+level+'-'+totalArr[i]+'" data-index="'+i+'" data-id="'+totalArr[i]+'"></li>';
                 }
             }
             oUl.innerHTML = oLi.replace(/^\s+|\s+$/g,"");
